@@ -74,7 +74,7 @@ def resetD():
 	velocidad2 = np.zeros(30).tolist()
 	pub1.publish((promedio1 + promedio2)/2)
 
-def reserI():
+def resetI():
 	global tiempoAnt3, velocidad3, tiempoAnt4, velocidad4, promedio3, promedio4
 	promedio3 = 0 
 	promedio4 = 0
