@@ -105,7 +105,7 @@ if __name__ == '__main__':
 		if time.time() - tiempoCuentas > 0.04:
 			if contaA == contaApre and contaB == contaBpre:
 				resetD()
-			if contaC == contaCpre and contaC == contaCpre:
+			if contaC == contaCpre and contaD == contaDpre:
 				resetI()
 			tiempoCuentas = time.time()
 			contaApre = contaA
