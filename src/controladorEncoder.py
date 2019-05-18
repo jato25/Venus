@@ -5,20 +5,20 @@ import numpy as np
 from std_msgs.msg import *
 
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(20,GPIO.OUT)
 GPIO.setup(21,GPIO.OUT)
-GPIO.setup(7,GPIO.OUT)
-GPIO.setup(8,GPIO.OUT)
-der1 = GPIO.PWM(20, 100)
-der2 = GPIO.PWM(21, 100)
-izq1 = GPIO.PWM(7, 100)
-izq2 = GPIO.PWM(8, 100)
+GPIO.setup(20,GPIO.OUT)
+GPIO.setup(16,GPIO.OUT)
+GPIO.setup(12,GPIO.OUT)
+der1 = GPIO.PWM(21, 100)
+der2 = GPIO.PWM(20, 100)
+izq1 = GPIO.PWM(16, 100)
+izq2 = GPIO.PWM(12, 100)
 der1.start(0)
 der2.start(0)
 izq1.start(0)
 izq2.start(0)
-VEL1 = 5
-VEL2 = -6
+VEL1 = 1
+VEL2 = 0.5
 integralD = 0
 velocidadD = 0
 errorAntD = 0
@@ -37,12 +37,10 @@ def controlD(vel):
 	derivada = (velocidadD - errorAntD)/(time.time()-tiempoAntD)
 	errorAntD = velocidadD
 	tiempoAntD = time.time()
-	if (vel >= 3):
-		ciclo = error*0.5 + 0.7*integralD - 0.1*derivada
-		tiempo = 0.04
-	else:
-		ciclo = error*0.08 + 1*integralD - 0.08*derivada
-		tiempo = 0.04
+	#if (vel >= 3):
+	ciclo = error*0.4 + 0.7*integralD - 0.1*derivada
+	'''else:
+		ciclo = error*0.08 + 1*integralD - 0.08*derivada'''
 	if(vel == 0):
 		ciclo = 0 
 	if (ciclo >100):
@@ -63,12 +61,10 @@ def controlI(vel):
 	derivada = (velocidadI - errorAntI)/(time.time()-tiempoAntI)
 	errorAntI = velocidadI
 	tiempoAntI = time.time()
-	if (vel >= 3):
-		ciclo = error*0.5 + 0.7*integralI - 0.1*derivada
-		tiempo = 0.04
-	else:
-		ciclo = error*0.08 + 1*integralI - 0.08*derivada
-		tiempo = 0.04
+	#if (vel >= 3):
+	ciclo = error*0.5 + 0.7*integralI - 0.1*derivada
+	'''else:
+		ciclo = error*0.08 + 1*integralI - 0.08*derivada'''
 	if(vel == 0):
 		ciclo = 0 
 	if (ciclo >100):

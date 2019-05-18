@@ -21,7 +21,7 @@ def mapaInfo(req):
 	print('Mapa recicibido')
 	s.shutdown()
 	return StartServiceResponse()
-
+	
 if __name__ == '__main__':
 	rospy.init_node('roberta' , anonymous = True)
 	estado = 0

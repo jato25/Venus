@@ -6,30 +6,14 @@ from std_msgs.msg import *
 
 #Setup
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(23,GPIO.IN)
-GPIO.setup(24,GPIO.IN)
-GPIO.setup(19,GPIO.IN)
-GPIO.setup(26,GPIO.IN)
+GPIO.setup(2,GPIO.IN)
+GPIO.setup(3,GPIO.IN)
+GPIO.setup(4,GPIO.IN)
+GPIO.setup(17,GPIO.IN)
 pub1 = rospy.Publisher('encoderDer', Float32, queue_size=10)
 pub2 = rospy.Publisher('cuentasDer', Int32, queue_size=10)
 pub3 = rospy.Publisher('encoderIzq', Float32, queue_size=10)
 pub4 = rospy.Publisher('cuentasIzq', Int32, queue_size=10)
-promedio1 = 0 
-promedio2 = 0
-promedio3 = 0 
-promedio4 = 0
-tiempoAnt1 = time.time()
-tiempoAnt2 = time.time()
-tiempoAnt3 = time.time()
-tiempoAnt4 = time.time()	
-contaA = 0 
-contaB = 0
-contaC = 0 
-contaD = 0
-velocidad1 = np.zeros(30).tolist()
-velocidad2 = np.zeros(30).tolist()
-velocidad3 = np.zeros(30).tolist()
-velocidad4 = np.zeros(30).tolist()
 
 #Callbacks
 def CuentaA(channel):
@@ -87,15 +71,32 @@ def resetI():
 if __name__ == '__main__':
 	global contaA, contaB, promedio1, promedio2, contaC, contaD, promedio3, promedio4
 	rospy.init_node('encoder')
-	GPIO.add_event_detect(23, GPIO.BOTH, callback = CuentaA)
-	GPIO.add_event_detect(24, GPIO.BOTH, callback = CuentaB)
-	GPIO.add_event_detect(19, GPIO.BOTH, callback = CuentaC)
-	GPIO.add_event_detect(26, GPIO.BOTH, callback = CuentaD)
+	promedio1 = 0 
+	promedio2 = 0
+	promedio3 = 0 
+	promedio4 = 0
+	tiempoAnt1 = time.time()
+	tiempoAnt2 = time.time()
+	tiempoAnt3 = time.time()
+	tiempoAnt4 = time.time()	
+	contaA = 0 
+	contaB = 0
+	contaC = 0 
+	contaD = 0
+	velocidad1 = np.zeros(30).tolist()
+	velocidad2 = np.zeros(30).tolist()
+	velocidad3 = np.zeros(30).tolist()
+	velocidad4 = np.zeros(30).tolist()
+	GPIO.add_event_detect(3, GPIO.BOTH, callback = CuentaA)
+	GPIO.add_event_detect(2, GPIO.BOTH, callback = CuentaB)
+	GPIO.add_event_detect(4, GPIO.BOTH, callback = CuentaC)
+	GPIO.add_event_detect(17, GPIO.BOTH, callback = CuentaD)
 	tasa = rospy.Rate(110)
 	contaApre = 0
 	contaBpre = 0
 	contaCpre = 0
 	contaDpre = 0
+	tiempoCuentas = time.time()
 	while not rospy.is_shutdown():
 		pub1.publish((promedio1 + promedio2)/2)
 		pub2.publish((contaA + contaB)/2)
@@ -107,7 +108,6 @@ if __name__ == '__main__':
 				resetD()
 			if contaC == contaCpre and contaD == contaDpre:
 				resetI()
-			tiempoCuentas = time.time()
 			contaApre = contaA
 			contaBpre = contaB
 			contaCpre = contaC
