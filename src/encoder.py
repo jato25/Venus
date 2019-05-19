@@ -21,7 +21,7 @@ def CuentaA(channel):
 	contaA += 1
 	deltaT = time.time() - tiempoAnt1
 	velocidad1 = [2*np.pi/(2*442*deltaT)] + velocidad1[0:-1]
-	promedio1 = np.mean(np.array(velocidad1))
+	promedio1 = np.mean(velocidad1)
 	tiempoAnt1 = time.time()
 
 def CuentaB(channel):
@@ -29,7 +29,7 @@ def CuentaB(channel):
 	contaB += 1
 	deltaT = time.time() - tiempoAnt2
 	velocidad2 = [2*np.pi/(2*442*deltaT)] + velocidad2[0:-1]
-	promedio2 = np.mean(np.array(velocidad2))
+	promedio2 = np.mean(velocidad2)
 	tiempoAnt2 = time.time()
 
 def CuentaC(channel):
@@ -56,7 +56,6 @@ def resetD():
 	tiempoAnt2 = time.time()
 	velocidad1 = np.zeros(30).tolist()
 	velocidad2 = np.zeros(30).tolist()
-	pub1.publish((promedio1 + promedio2)/2)
 
 def resetI():
 	global tiempoAnt3, velocidad3, tiempoAnt4, velocidad4, promedio3, promedio4
@@ -66,7 +65,6 @@ def resetI():
 	tiempoAnt4 = time.time()
 	velocidad3 = np.zeros(30).tolist()
 	velocidad4 = np.zeros(30).tolist()
-	pub3.publish((promedio3 + promedio4)/2)
 
 if __name__ == '__main__':
 	global contaA, contaB, promedio1, promedio2, contaC, contaD, promedio3, promedio4
@@ -98,18 +96,19 @@ if __name__ == '__main__':
 	contaDpre = 0
 	tiempoCuentas = time.time()
 	while not rospy.is_shutdown():
-		pub1.publish((promedio1 + promedio2)/2)
-		pub2.publish((contaA + contaB)/2)
-		pub3.publish((promedio3 + promedio4)/2)
-		pub4.publish((contaC + contaD)/2)
-		tasa.sleep()
 		if time.time() - tiempoCuentas > 0.04:
 			if contaA == contaApre and contaB == contaBpre:
 				resetD()
 			if contaC == contaCpre and contaD == contaDpre:
 				resetI()
+			tiempoCuentas = time.time()
 			contaApre = contaA
 			contaBpre = contaB
 			contaCpre = contaC
 			contaDpre = contaD
+		pub1.publish((promedio1 + promedio2)/2)
+		pub2.publish((contaA + contaB)/2)
+		pub3.publish((promedio3 + promedio4)/2)
+		pub4.publish((contaC + contaD)/2)
+		tasa.sleep()
 	GPIO.cleanup()

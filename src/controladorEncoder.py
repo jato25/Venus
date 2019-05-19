@@ -41,11 +41,11 @@ def controlD(vel):
 	ciclo = error*0.4 + 0.7*integralD - 0.1*derivada
 	'''else:
 		ciclo = error*0.08 + 1*integralD - 0.08*derivada'''
-	if(vel == 0):
-		ciclo = 0 
-	if (ciclo >100):
-		ciclo=100
-	elif(ciclo<0):
+	if(vel <= 0.03):
+		ciclo = 0
+	if (ciclo > 100):
+		ciclo = 100
+	elif(ciclo < 0):
 		ciclo = 0
 	if (vel > 0):
 		der1.ChangeDutyCycle(ciclo)
@@ -62,14 +62,14 @@ def controlI(vel):
 	errorAntI = velocidadI
 	tiempoAntI = time.time()
 	#if (vel >= 3):
-	ciclo = error*0.5 + 0.7*integralI - 0.1*derivada
+	ciclo = error*0.4 + 0.7*integralI - 0.1*derivada
 	'''else:
 		ciclo = error*0.08 + 1*integralI - 0.08*derivada'''
-	if(vel == 0):
+	if(vel <= 0.03):
 		ciclo = 0 
-	if (ciclo >100):
-		ciclo=100
-	elif(ciclo<0):
+	if (ciclo > 100):
+		ciclo = 100
+	elif(ciclo < 0):
 		ciclo = 0
 	if (vel > 0):
 		izq1.ChangeDutyCycle(ciclo)
