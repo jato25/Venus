@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys, rospy, time
 import numpy as np
-from master_msgs_iele3338.srv import StartService, AckService, EndService, StartServiceResponse
+from master_msgs_iele3338.srv import StartService, AckService, EndService, StartServiceResponse, mapa_inicio, mapa_inicioResponse
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
@@ -12,16 +12,20 @@ ip = "157.253.110.177"
 grupo = 6
 
 def mapaInfo(req):
-	global start, goal, obstacles
-	start = np.array([req.start.position.x, req.start.position.y, req.start.orientation.w])
-	goal = np.array([req.goal.position.x, req.goal.position.y, req.goal.orientation.w])
-	obstacles = []
-	for i in range(req.n_obstacles):
-		obstacles.append(np.array([req.obstacles[i].position.position.x , req.obstacles[i].position.position.y, req.obstacles[i].radius]))
-	print('Mapa recicibido')
+	global start, goal, obstacles, n_obstacles
+	start = req.start
+	goal = req.goal
+	obstacles = req.obstacles
+	n_obstacles = req.n_obstacles
+	rospy.loginfo('Mapa recicibido')
 	s.shutdown()
 	return StartServiceResponse()
-	
+
+def inicioMapa(info):
+	global start, goal, obstacles, n_obstacles
+	s.shutdown()
+	return mapa_inicioResponse(start, goal, n_obstacles, obstacles)
+
 if __name__ == '__main__':
 	rospy.init_node('roberta' , anonymous = True)
 	estado = 0
@@ -29,8 +33,10 @@ if __name__ == '__main__':
 	ack = rospy.ServiceProxy('ack_service', AckService)
 	while estado == 0:
 		estado = ack(grupo , ip).state
-	print('Esperando servicio')
+	rospy.loginfo('Esperando servicio')
 	s = rospy.Service('start_service', StartService,  mapaInfo)
+	s.spin()
+	s = rospy.Service('mapa_inicio', mapa_inicio, inicioMapa)
 	s.spin()
 	tasa = rospy.Rate(10)
 	while not rospy.is_shutdown():
