@@ -16,7 +16,7 @@ r = 0.0925	##Radio de las ruedas del Pioneer obtenidas en el manual en m
 l = 0.1900	##Distancia entre la rueda y el punto con el que se modela el robot en m
 J1 = np.array([[1,0,l],[1,0,-l]]) 
 inv_J2 = np.array([[1.0/r,0],[0,1.0/r]])
-pub = rospy.Publisher('/motorsVel', Float32MultiArray, queue_size=10) #Se define que se publica en el topico de velocidad de las ruedas del motor
+
 #Metodo que hace todas las suscripciones a los topicos y toma los valores entrados por parametro en la terminal
 def arrancar():
 	global xfin, yfin, thetafin
