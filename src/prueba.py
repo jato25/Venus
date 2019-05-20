@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import sys, rospy, time
 import numpy as np
-from master_msgs_iele3338.srv import StartService, AckService, EndService, StartServiceResponse, mapa_inicio, mapa_inicioResponse
+from master_msgs_iele3338.srv import StartService, AckService, EndService, StartServiceResponse, mapaInicio, mapaInicioResponse
 from geometry_msgs.msg import Pose
 from geometry_msgs.msg import Point
 from geometry_msgs.msg import Quaternion
@@ -24,7 +24,7 @@ def mapaInfo(req):
 def inicioMapa(info):
 	global start, goal, obstacles, n_obstacles
 	s.shutdown()
-	return mapa_inicioResponse(start, goal, n_obstacles, obstacles)
+	return mapaInicioResponse(start, goal, n_obstacles, obstacles)
 
 if __name__ == '__main__':
 	rospy.init_node('roberta' , anonymous = True)
@@ -36,7 +36,7 @@ if __name__ == '__main__':
 	rospy.loginfo('Esperando servicio')
 	s = rospy.Service('start_service', StartService,  mapaInfo)
 	s.spin()
-	s = rospy.Service('mapa_inicio', mapa_inicio, inicioMapa)
+	s = rospy.Service('mapa_inicio', mapaInicio, inicioMapa)
 	s.spin()
 	tasa = rospy.Rate(10)
 	while not rospy.is_shutdown():
