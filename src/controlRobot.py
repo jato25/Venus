@@ -12,8 +12,8 @@ import sys
 
 pub1 = rospy.Publisher('Velocidades', Float32, queue_size=10)
 robot = 2
-r = 0.0925	##Radio de las ruedas del Pioneer obtenidas en el manual en m
-l = 0.1900	##Distancia entre la rueda y el punto con el que se modela el robot en m
+r = 0.0325	##Radio de las ruedas del Pioneer obtenidas en el manual en m
+l = 0.0900	##Distancia entre la rueda y el punto con el que se modela el robot en m
 J1 = np.array([[1,0,l],[1,0,-l]]) 
 inv_J2 = np.array([[1.0/r,0],[0,1.0/r]])
 
