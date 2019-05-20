@@ -5,44 +5,33 @@ from std_msgs.msg import Float32MultiArray, Float32
 from pylab import *
 from pynput.keyboard import Key, Listener 
 from geometry_msgs.msg import Twist
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import threading
 import time
 import sys 
 
-pub1 = rospy.Publisher('Velocidades', Float32, queue_size=10)
-
-rospy.Suscriber('   ', Float32MultiArray, )
+pub1 = rospy.Publisher('Velocidades', Float32MultiArray, queue_size=10)
 
 
-
-robot = 2
-r = 0.0325	##Radio de las ruedas del Pioneer obtenidas en el manual en m
-l = 0.0900	##Distancia entre la rueda y el punto con el que se modela el robot en m
+robot = 170
+r = 32.5	##Radio de las ruedas del Pioneer obtenidas en el manual en mm
+l = 90.0	##Distancia entre la rueda y el punto con el que se modela el robot en mm
 J1 = np.array([[1,0,l],[1,0,-l]]) 
 inv_J2 = np.array([[1.0/r,0],[0,1.0/r]])
 
 #Metodo que hace todas las suscripciones a los topicos y toma los valores entrados por parametro en la terminal
 def arrancar():
-	global xfin, yfin, thetafin
 	#Suscripcion a topicos de ros
 	rospy.init_node('ControlPos', anonymous = True)
 	tasa = rospy.Rate(10)
 	rospy.myargv(argv=sys.argv)
-	try:
-		xfin = float(sys.argv[1]) #Coordenada x entrada en la terminal
-		yfin = float(sys.argv[2]) #Coordenada y entrada en la terminal
-		thetafin = float(sys.argv[3]) #Angulo entrado en la terminal
-	except:    								##Tratamiento de los argumentos ingresador por el usuario
-		xfin = 40
-		yfin = 40
-		thetafin = math.pi/2
-	time.sleep(1)
+	rospy.Suscriber('PosRobotSiguiente', Float32MultiArray, LeerPosSiguiente)
+	rospy.Suscriber('PosRobot', Float32MultiArray, LeerPos)
 	#Se crean la cuadricula con las celdas para representar el mapa de V-rep
-	threading.Thread(target=control).start()
 	try:
 		while not rospy.is_shutdown():
 			tasa.sleep()
+			control()
 			publicar()
 	except rospy.ServiceException as e:
 		pass
@@ -51,99 +40,66 @@ def arrancar():
 
 def publicar():
 	global vec
-	pub.publish(data = [vec[1],vec[0]])
+	pub1.publish(data = [vec[0],vec[1]])
 #Metodo que crea la cuadricula que representa el mapa de V-rep
-
+def LeerPosSiguiente(data):
+	global posix, posiy, thetafin
+	posix=data.data[0]
+	posiy=data.data[1]
+	thetafin=data.data[2]
+def LeerPos(data):
+	global x_vec, y_vec, lastheta
+	x_vec= data.data[0]
+	y_vec= data.data[1]
+	lastheta=data.data[2]
 
 def R(theta): ##funcion que retorna la matriz de rotacion
 	return np.array([[math.cos(theta),math.sin(theta),0],[-math.sin(theta),math.cos(theta),0],[0,0,1]])
 #Metodo que busca el nodo en la matriz de nodo con las posciones que le entran por paramtero
 
 def control():
-	global posix, posiy, lastheta, vec, xfin, yfin, thetafin, bandera
-	rho = 10
-	beta = 20
-	x_vec,y_vec = Astar()
-	x_vec.reverse()
-	y_vec.reverse()
-	for i in range(len(x_vec)):
-		while rho >= 0.08:
-			dx = x_vec[i] - posix[-1]
-			dy = y_vec[i] - posiy[-1]
-			if (x_vec[i] == x_vec[-2] and y_vec[i] == y_vec[-2]):
-				dtheta = lastheta - thetafin
-			elif (i != len(x_vec)-1):
-				dtheta = lastheta - math.atan2(y_vec[i+1]-y_vec[i],x_vec[i+1]-x_vec[i])
-			else:
-				dtheta = lastheta - thetafin
-			rho = math.sqrt((dx)**2 + (dy)**2)
-			alpha = -lastheta + math.atan2(dy,dx)	#Se calculan los errores en coordenadas esfericas y se calcula la velocidad de acuerdo con kp
-			beta = -math.atan2(dy,dx) - dtheta
-			if (alpha >= 2*math.pi):
-				alpha = alpha - 2*pi
-			elif (alpha <= -2*math.pi):
-				alpha = alpha + 2*pi
-			if (beta >= 2*math.pi):
-				beta = beta - 2*pi
-			elif (beta <= -2*math.pi):
-				beta = beta + 2*pi
-			#Se definen las constantes de control proporcional por sintonizacion
-			kb = 0.07
-			kp = 0.6
-			ka = 1.8
-			v = kp * rho
-			x = v*math.cos(lastheta)
-			y = v*math.sin(lastheta)
-			w = (ka*alpha) + (kb*(beta))
-			vec = inv_J2.dot(J1.dot(R(lastheta).dot(np.array([x,y,w]))))
-			time.sleep(0.2)
-			if bandera:
-				return False
-		rho = 10
-		beta = 20
-	beta = 0.5
-	while abs(beta) >= 0.01:
-		kb = 0.3
-		beta = -lastheta + thetafin
-		if (beta >= 2*math.pi):
-				beta = beta - 2*pi
-		elif (beta <= -2*math.pi): 
-			beta = beta + 2*pi
-		w =(kb*(beta))
-		x = 0
-		y = 0
-		vec = inv_J2.dot(J1.dot(R(lastheta).dot(np.array([x,y,w]))))
-		time.sleep(0.2)
-		if bandera:
-			return False
-	bandera = True
-	vec = [0,0]
-	return False
+	global posix, posiy, lastheta, vec, bandera, x_vec, y_vec
 
-def ThreadInputs():
-	with Listener(on_press = keypress) as listener:
-		listener.join()
+	#Tomar las posiciones del topico de 
+	#x_vec,y_vec = Astar()
 
-
-
-
+	dx = x_vec - posix
+	dy = y_vec - posiy
+	dtheta = lastheta - thetafin
+	rho=1.08
+	#rho = math.sqrt((dx)**2 + (dy)**2)
+	alpha = -lastheta + math.atan2(dy,dx)	#Se calculan los errores en coordenadas esfericas y se calcula la velocidad de acuerdo con kp
+	beta = -math.atan2(dy,dx) - dtheta
+	if (alpha >= 2*math.pi):
+		alpha = alpha - 2*pi
+	elif (alpha <= -2*math.pi):
+		alpha = alpha + 2*pi
+	if (beta >= 2*math.pi):
+		beta = beta - 2*pi
+	elif (beta <= -2*math.pi):
+		beta = beta + 2*pi
+	#Se definen las constantes de control proporcional por sintonizacion
+	kb = 0.07
+	kp =1
+	ka = 1.8
+	v = kp * rho
+	x = v*math.cos(lastheta)
+	y = v*math.sin(lastheta)
+	w = (ka*alpha) + (kb*(beta))
+	vec = inv_J2.dot(J1.dot(R(lastheta).dot(np.array([x,y,w]))))
+		
 if __name__ == '__main__':	
-	global obs, bandera, posix, posiy, lastheta, vec, xfin, yfin, thetafin, matriz, matNod, xplot, yplot
-	obs = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+	global posix, posiy, lastheta, vec, x_vec, y_vec, thetafin
 	posix = [0]
 	posiy = [0]
-	xplot = [0]
-	yplot = [0]
 	vec = [0,0]
-	matriz = [[0  for i in range(200)]for j in range(200)]
-	matNod = [[Nodo([i , j]) for i in range(200)]for j in range(200)]
-	bandera = False
-	xfin = 0
-	yfin = 0
+	#matriz = [[0  for i in range(200)]for j in range(200)]
+	#matNod = [[Nodo([i , j]) for i in range(200)]for j in range(200)]
+	x_vec = 0
+	y_vec = 0
 	lastheta = 0
 	thetafin = 0
 	try:
-		threading.Thread(target=ThreadInputs).start()
 		arrancar()
 	except rospy.ServiceException:
 		pass
