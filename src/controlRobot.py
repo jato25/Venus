@@ -11,6 +11,11 @@ import time
 import sys 
 
 pub1 = rospy.Publisher('Velocidades', Float32, queue_size=10)
+
+rospy.Suscriber('   ', Float32MultiArray, )
+
+
+
 robot = 2
 r = 0.0325	##Radio de las ruedas del Pioneer obtenidas en el manual en m
 l = 0.0900	##Distancia entre la rueda y el punto con el que se modela el robot en m
