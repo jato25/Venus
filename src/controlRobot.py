@@ -20,9 +20,7 @@ pub = rospy.Publisher('/motorsVel', Float32MultiArray, queue_size=10) #Se define
 def arrancar():
 	global xfin, yfin, thetafin
 	#Suscripcion a topicos de ros
-	rospy.init_node('punto2c', anonymous = True)
-	rospy.Subscriber('/obstacles', Float32MultiArray ,obstacles)
-	rospy.Subscriber('/pioneerPosition', Twist ,vecto)
+	rospy.init_node('ControlPos', anonymous = True)
 	tasa = rospy.Rate(10)
 	rospy.myargv(argv=sys.argv)
 	try:
@@ -35,9 +33,7 @@ def arrancar():
 		thetafin = math.pi/2
 	time.sleep(1)
 	#Se crean la cuadricula con las celdas para representar el mapa de V-rep
-	crearCuadricula()
 	threading.Thread(target=control).start()
-	threading.Thread(target=plotPos).start()
 	try:
 		while not rospy.is_shutdown():
 			tasa.sleep()
