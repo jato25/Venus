@@ -63,7 +63,7 @@ def cuentasizquierda(data):
 
 # calculo de desplazamiento del robot	
 def desplazamiento():
-	global dsr, dsl, ds, dtheta, x_actual, y_acutal, theta_actual
+	global dsr, dsl, ds, dtheta, NR, Nl
 	for i in range 
 	
 		dsl=(Nl*2*numpy.pi*32.5)/(442/34)
