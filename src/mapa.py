@@ -7,8 +7,8 @@ from master_msgs_iele3338.msg import Obstacle
 from geometry_msgs.msg import Pose, Point, Quaternion
 from std_msgs.msg import *
 
-tamanoCua = 62.5
-robot = 0/tamanoCua
+tamanoCua = 25
+robot = 70/tamanoCua
 
 #Metodo que crea la cuadricula que representa el mapa de V-rep
 def crearCuadricula(obstacles):
@@ -38,7 +38,7 @@ def crearCuadricula(obstacles):
 class Nodo:
 	def __init__(self, pos):
 		self.pos = pos
-		self.coord = [(tamanoCua*pos[0]) , (tamanoCua*pos[1])]
+		self.coord = [tamanoCua/2 + (tamanoCua*pos[0]) , tamanoCua/2 + (tamanoCua*pos[1])]
 		self.costo = 1000000000
 		self.vecinos = []
 		self.objetivo = False
@@ -68,13 +68,13 @@ class Nodo:
 #Metodo que busca el nodo en la matriz de nodo con las posciones que le entran por paramtero
 def buscarNodo(x,y):
 	global matNod
-	a = int(round(x/tamanoCua))
-	b = int(round(y/tamanoCua))
+	a = int(round((x-tamanoCua/2)/tamanoCua))
+	b = int(round((y-tamanoCua/2)/tamanoCua))
 	return matNod[a][b]
 
 #Metodo que busca un mejor nodo que el que llama al metodo partiendo del costo actual devuelve el mejor nodo				
 def buscarMejor(nodos):
-	cost = 10000000
+	cost = 10000000000
 	best = None
 	for nod in nodos:
 		if(nod.costo < cost):
@@ -111,17 +111,17 @@ def Astar(inicio, destino):
 			costo = costos[actual] + actual.defHeu(vecino.coord)
 			if (vecino not in explorados and not vecino.visitado) or costo < costos[vecino]:
 				costos[vecino] = costo
-				vecino.cambiarCosto(10*costo + 4*vecino.defHeu(pos_f))
+				vecino.cambiarCosto(6*costo + 3*vecino.defHeu(pos_f))
 				vecino.asignarPadre(actual)
 				explorados.append(vecino)
 	rutax = []
 	rutay = []
+	print(actual.coord)
 	while actual.padre != None:
 		coord2 = actual.pos
 		rutax.append(coord2[0])
 		rutay.append(coord2[1])
 		actual = actual.padre
-	print([rutax[0],rutay[0]])
 	return rutax, rutay
 	
 if __name__ == '__main__':
@@ -142,9 +142,9 @@ if __name__ == '__main__':
 	for i in range(len(x_list)):
 		matriz[x_list[i]][y_list[i]] = '*'
 		if i == len(x_list)-1:
-			matriz[x_list[i]][y_list[i]] = 'o'
+			matriz[x_list[i]][y_list[i]] = 'I'
 
-	for i in range(int(2400/tamanoCua)):
+	for i in range(int(2500/tamanoCua)):
 		for j in range(int(2500/tamanoCua)):
 			print matriz[i][j],
 		print("")
