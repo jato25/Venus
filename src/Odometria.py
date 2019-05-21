@@ -69,11 +69,14 @@ def keypress(key):
 
 	
 def desplazamiento():
-	global dsr, dsl, dtheta, x_actual, y_acutal, theta_actual
+	global dsr, dsl, ds, dtheta, x_actual, y_acutal, theta_actual
 	for i in range 
 	
 		dsl=(Nl*2*numpy.pi*32.5)/(442/34)
 		dsr=(NR*2*numpy.pi*32.5)/(442/34)
+		
+		ds = (dsl+dsr)/2
+		dtheta = (dsl-dsr)/l
 
 
 
