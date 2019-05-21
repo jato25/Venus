@@ -5,7 +5,7 @@ from std_msgs.msg import Float32MultiArray, Float32
 from pylab import *
 from pynput.keyboard import Key, Listener 
 from geometry_msgs.msg import Twist
-#import matplotlib.pyplot as plt
+import numpy as np
 import threading
 import time
 import sys
