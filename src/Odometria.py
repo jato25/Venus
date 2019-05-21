@@ -64,6 +64,21 @@ def keypress(key):
 	if key == Key.esc:
 		bandera = True
 		return False
+	
+	
+
+	
+def desplazamiento():
+	global dsr, dsl, dtheta, x_actual, y_acutal, theta_actual
+	for i in range 
+	
+		dsl=(Nl*2*numpy.pi*32.5)/(442/34)
+		dsr=(NR*2*numpy.pi*32.5)/(442/34)
+
+
+
+
+
 
 def plotPos():
 	global posix, posiy, bandera, posTeox, posTeoy, tiempoSimu, error, fin
