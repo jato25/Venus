@@ -26,7 +26,7 @@ pub = rospy.Publisher('/motorsVel', Float32MultiArray, queue_size=10)
 
 def arrancar():
 	global nombreArchivo, vel_der, vel_izq, tiempo, xfin, yfin, thetafin
-	rospy.init_node('punto3', anonymous = True)
+	rospy.init_node('Odometria', anonymous = True)
 	rospy.myargv(argv=sys.argv)
 	try:
 		xfin = float(sys.argv[1])
@@ -36,14 +36,17 @@ def arrancar():
 		xfin = 4
 		yfin = 4
 		thetafin = math.pi/2
-	rospy.Subscriber('/pioneerPosition', Twist ,vecto)
-	rospy.Subscriber('/simulationTime', Float32, controlTiempo) 
+		
+	rospy.Subscriber('cuentasDer', Int32 ,cuentasderecha)
+	rospy.Subscriber('cuentasIzq', Int32,cuentasizquierda) 
 	tasa = rospy.Rate(10)
+	
 	try:
 		while not rospy.is_shutdown():
 			tasa.sleep()		
 	except rospy.ServiceException as e:
 		pass
+	
 	
 def vecto(data):
 	global posix, posiy, lastheta, vec
@@ -64,10 +67,19 @@ def keypress(key):
 	if key == Key.esc:
 		bandera = True
 		return False
+
+	
+def cuentasderecha(data):	
+	global NR
+	NR.data
+	
+def cuentasizquierda(data):
+	global Nl
+	Nl.data
 	
 	
 
-	
+# calculo de desplazamiento del robot	
 def desplazamiento():
 	global dsr, dsl, ds, dtheta, x_actual, y_acutal, theta_actual
 	for i in range 
@@ -78,8 +90,7 @@ def desplazamiento():
 		ds = (dsl+dsr)/2
 		dtheta = (dsl-dsr)/l
 
-
-
+		np.array([[ds*math.cos(theta+dtheta/2)],[ds*math.sin(theta+dtheta/2)],[dtheta]])
 
 
 
