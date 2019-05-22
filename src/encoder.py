@@ -14,21 +14,18 @@ pub1 = rospy.Publisher('encoderDer', Float32, queue_size=10)
 pub2 = rospy.Publisher('cuentasDer', Int32, queue_size=10)
 pub3 = rospy.Publisher('encoderIzq', Float32, queue_size=10)
 pub4 = rospy.Publisher('cuentasIzq', Int32, queue_size=10)
-pub5 = rospy.Publisher('dirDer', Int32, queue_size=10)
-pub6 = rospy.Publisher('dirIzq', Int32, queue_size=10)
+
 #Callbacks
 def CuentaA(channel):
-	global contaA, tiempoAnt1, velocidad1, promedio1, canalB, direcD
+	global contaA, tiempoAnt1, velocidad1, promedio1
 	contaA += 1
 	deltaT = time.time() - tiempoAnt1
 	velocidad1 = [2*np.pi/(2*442*deltaT)] + velocidad1[0:-1]
 	promedio1 = np.mean(velocidad1)
 	tiempoAnt1 = time.time()
-	direcD = GPIO.input(channel) == canalB
 
 def CuentaB(channel):
-	global contaB, tiempoAnt2, velocidad2, promedio2, canalB
-	canalB = GPIO.input(channel)
+	global contaB, tiempoAnt2, velocidad2, promedio2
 	contaB += 1
 	deltaT = time.time() - tiempoAnt2
 	velocidad2 = [2*np.pi/(2*442*deltaT)] + velocidad2[0:-1]
@@ -36,17 +33,15 @@ def CuentaB(channel):
 	tiempoAnt2 = time.time()
 
 def CuentaC(channel):
-	global contaC, tiempoAnt3, velocidad3, promedio3, canalD, direcI
+	global contaC, tiempoAnt3, velocidad3, promedio3
 	contaC += 1
 	deltaT = time.time() - tiempoAnt3
 	velocidad3 = [2*np.pi/(2*442*deltaT)] + velocidad3[0:-1]
 	promedio3 = np.mean(velocidad3)
 	tiempoAnt3 = time.time()
-	direcI = GPIO.input(channel) == canalD
 
 def CuentaD(channel):
-	global contaD, tiempoAnt4, velocidad4, promedio4, canalD
-	canalD = GPIO.input(channel)
+	global contaD, tiempoAnt4, velocidad4, promedio4
 	contaD += 1
 	deltaT = time.time() - tiempoAnt4
 	velocidad4 = [2*np.pi/(2*442*deltaT)] + velocidad4[0:-1]
@@ -72,10 +67,10 @@ def resetI():
 	velocidad4 = np.zeros(30).tolist()
 
 if __name__ == '__main__':
-	global contaA, contaB, promedio1, promedio2, contaC, contaD, promedio3, promedio4, canalB, direcD, canalC, direcI
+	global contaA, contaB, promedio1, promedio2, contaC, contaD, promedio3, promedio4, contaApre,contaBpre,contaCpre,contaDpre
 	rospy.init_node('encoder')
 	canalB = False
-	canalC = False
+	canalD = False
 	direcD = False
 	direcI = False
 	promedio1 = 0 
@@ -94,11 +89,11 @@ if __name__ == '__main__':
 	velocidad2 = np.zeros(30).tolist()
 	velocidad3 = np.zeros(30).tolist()
 	velocidad4 = np.zeros(30).tolist()
-	GPIO.add_event_detect(3, GPIO.BOTH, callback = CuentaA)
-	GPIO.add_event_detect(2, GPIO.BOTH, callback = CuentaB)
+	GPIO.add_event_detect(2, GPIO.BOTH, callback = CuentaA)
+	GPIO.add_event_detect(3, GPIO.BOTH, callback = CuentaB)
 	GPIO.add_event_detect(4, GPIO.BOTH, callback = CuentaC)
 	GPIO.add_event_detect(17, GPIO.BOTH, callback = CuentaD)
-	tasa = rospy.Rate(110)
+	tasa = rospy.Rate(500)
 	contaApre = 0
 	contaBpre = 0
 	contaCpre = 0
@@ -119,13 +114,5 @@ if __name__ == '__main__':
 		pub2.publish((contaA + contaB)/2)
 		pub3.publish((promedio3 + promedio4)/2)
 		pub4.publish((contaC + contaD)/2)
-		if (direcI):
-			pub6.publish(0)
-		else:
-			pub6.publish(1)
-		if (direcD):
-			pub5.publish(0)
-		else:
-			pub5.publish(1)
 		tasa.sleep()
 	GPIO.cleanup()

@@ -7,8 +7,9 @@ from master_msgs_iele3338.msg import Obstacle
 from geometry_msgs.msg import Pose, Point, Quaternion
 from std_msgs.msg import *
 
-tamanoCua = 30
+tamanoCua = 125
 robot = 130/tamanoCua
+pub = rospy.Publisher('PosRobotSiguiente', Float32MultiArray, queue_size=10)
 
 #Metodo que crea la cuadricula que representa el mapa de V-rep
 def crearCuadricula(obstacles):
@@ -17,7 +18,7 @@ def crearCuadricula(obstacles):
 	for obstaculo in obstacles:
 		x = obstaculo[0]/tamanoCua
 		y = obstaculo[1]/tamanoCua
-		r = obstaculo[2]/(2*tamanoCua)
+		r = obstaculo[2]/(tamanoCua)
 		matriz[int(x)][int(y)] = 1
 		for j in range(int(x-r-robot)-1, int(x+r+robot)+1):
 			for k in range(int(y-r-robot)-1, int(y+r+robot)+1):
@@ -118,7 +119,7 @@ def Astar(inicio, destino):
 	rutay = []
 	print(actual.coord)
 	while actual.padre != None:
-		coord2 = actual.pos
+		coord2 = actual.coord
 		rutax.append(coord2[0])
 		rutay.append(coord2[1])
 		actual = actual.padre
@@ -129,8 +130,12 @@ def posInfo(info):
 	s.shutdown()
 	return posInicioResponse(start)
 
+def posActual(data):
+	global venusPos
+	venusPos = data.data
 if __name__ == '__main__':
-	global matNod, matriz, start
+	global matNod, matriz, start, venusPos
+	venusPos = [0,0,0]
 	matNod = [[Nodo([i , j]) for i in range(int(2500/tamanoCua))]for j in range(int(2500/tamanoCua))]
 	rospy.init_node('mapa')
 	rospy.wait_for_service('mapa_inicio')
@@ -145,8 +150,21 @@ if __name__ == '__main__':
 	s = rospy.Service('pos_inicio', posInicio,  posInfo)
 	s.spin()
 	start = np.array(start)
+	rospy.Subscriber('venus_position',Float32MultiArray, posActual)
 	crearCuadricula(obstacles)
+	tasa = rospy.Rate(200)
 	x_list,y_list = Astar(start, goal)
+	x_list.reverse()
+	y_list.reverse()
+	rospy.loginfo('Ruta Lista')
+	while not rospy.is_shutdown():
+		for i in range(len(x_list)):
+			rho = 50000000
+			while (rho > 20):
+				rho = math.sqrt((x_list[i]-venusPos[0])**2 + (y_list[i]-venusPos[1])**2)
+				pub.publish(data = [x_list[i],y_list[i],0])
+			rho = 50000000
+		tasa.sleep()
 	'''for i in range(len(x_list)):
 		matriz[x_list[i]][y_list[i]] = '*'
 		if i == len(x_list)-1:
