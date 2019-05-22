@@ -2,13 +2,13 @@
 import sys, rospy, time
 from pylab import *
 import numpy as np
-from master_msgs_iele3338.srv import mapaInicio
+from master_msgs_iele3338.srv import mapaInicio, posInicio, posInicioResponse
 from master_msgs_iele3338.msg import Obstacle
 from geometry_msgs.msg import Pose, Point, Quaternion
 from std_msgs.msg import *
 
-tamanoCua = 25
-robot = 70/tamanoCua
+tamanoCua = 30
+robot = 130/tamanoCua
 
 #Metodo que crea la cuadricula que representa el mapa de V-rep
 def crearCuadricula(obstacles):
@@ -17,7 +17,7 @@ def crearCuadricula(obstacles):
 	for obstaculo in obstacles:
 		x = obstaculo[0]/tamanoCua
 		y = obstaculo[1]/tamanoCua
-		r = obstaculo[2]/tamanoCua
+		r = obstaculo[2]/(2*tamanoCua)
 		matriz[int(x)][int(y)] = 1
 		for j in range(int(x-r-robot)-1, int(x+r+robot)+1):
 			for k in range(int(y-r-robot)-1, int(y+r+robot)+1):
@@ -89,10 +89,10 @@ def Astar(inicio, destino):
 		for nod in fil:
 			nod.esActual(False)
 	pos_f = [destino[0],destino[1]]
-	goal = buscarNodo(destino[0],destino[1])
+	goal = buscarNodo(destino[1],destino[0])
 	goal.esObjetivo(True)
 	explorados = []
-	actual = buscarNodo(inicio[0],inicio[1])
+	actual = buscarNodo(inicio[1],inicio[0])
 	actual.asignarPadre(None)
 	explorados.append(actual)
 	actual.cambiarCosto(0)
@@ -123,30 +123,38 @@ def Astar(inicio, destino):
 		rutay.append(coord2[1])
 		actual = actual.padre
 	return rutax, rutay
-	
+
+def posInfo(info):
+	global start
+	s.shutdown()
+	return posInicioResponse(start)
+
 if __name__ == '__main__':
-	global matNod, matriz
+	global matNod, matriz, start
 	matNod = [[Nodo([i , j]) for i in range(int(2500/tamanoCua))]for j in range(int(2500/tamanoCua))]
 	rospy.init_node('mapa')
 	rospy.wait_for_service('mapa_inicio')
 	met = rospy.ServiceProxy('mapa_inicio', mapaInicio)
 	req = met()
-	start = np.array([req.start.position.x, req.start.position.y, req.start.orientation.w])
+	start = [req.start.position.x, req.start.position.y, req.start.orientation.w]
 	goal = np.array([req.goal.position.x, req.goal.position.y, req.goal.orientation.w])
 	obstacles = []
 	n_obstacles = req.n_obstacles
 	for i in range(req.n_obstacles):
 		obstacles.append(np.array([req.obstacles[i].position.position.x , req.obstacles[i].position.position.y, req.obstacles[i].radius]))
+	s = rospy.Service('pos_inicio', posInicio,  posInfo)
+	s.spin()
+	start = np.array(start)
 	crearCuadricula(obstacles)
 	x_list,y_list = Astar(start, goal)
-	for i in range(len(x_list)):
+	'''for i in range(len(x_list)):
 		matriz[x_list[i]][y_list[i]] = '*'
 		if i == len(x_list)-1:
 			matriz[x_list[i]][y_list[i]] = 'I'
-
+	matriz[int(goal[0]/tamanoCua)][int(goal[1]/tamanoCua)] = 'G'
 	for i in range(int(2500/tamanoCua)):
 		for j in range(int(2500/tamanoCua)):
 			print matriz[i][j],
-		print("")
+		print("")'''
 
 	
