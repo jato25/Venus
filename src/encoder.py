@@ -14,18 +14,21 @@ pub1 = rospy.Publisher('encoderDer', Float32, queue_size=10)
 pub2 = rospy.Publisher('cuentasDer', Int32, queue_size=10)
 pub3 = rospy.Publisher('encoderIzq', Float32, queue_size=10)
 pub4 = rospy.Publisher('cuentasIzq', Int32, queue_size=10)
-
+pub5 = rospy.Publisher('dirDer', Int32, queue_size=10)
+pub6 = rospy.Publisher('dirIzq', Int32, queue_size=10)
 #Callbacks
 def CuentaA(channel):
-	global contaA, tiempoAnt1, velocidad1, promedio1
+	global contaA, tiempoAnt1, velocidad1, promedio1, canalB, direcD
 	contaA += 1
 	deltaT = time.time() - tiempoAnt1
 	velocidad1 = [2*np.pi/(2*442*deltaT)] + velocidad1[0:-1]
 	promedio1 = np.mean(velocidad1)
 	tiempoAnt1 = time.time()
+	direcD = GPIO.input(channel) == canalB
 
 def CuentaB(channel):
-	global contaB, tiempoAnt2, velocidad2, promedio2
+	global contaB, tiempoAnt2, velocidad2, promedio2, canalB
+	canalB = GPIO.input(channel)
 	contaB += 1
 	deltaT = time.time() - tiempoAnt2
 	velocidad2 = [2*np.pi/(2*442*deltaT)] + velocidad2[0:-1]
@@ -33,15 +36,17 @@ def CuentaB(channel):
 	tiempoAnt2 = time.time()
 
 def CuentaC(channel):
-	global contaC, tiempoAnt3, velocidad3, promedio3
+	global contaC, tiempoAnt3, velocidad3, promedio3, canalD, direcI
 	contaC += 1
 	deltaT = time.time() - tiempoAnt3
 	velocidad3 = [2*np.pi/(2*442*deltaT)] + velocidad3[0:-1]
 	promedio3 = np.mean(velocidad3)
 	tiempoAnt3 = time.time()
+	direcI = GPIO.input(channel) == canalD
 
 def CuentaD(channel):
-	global contaD, tiempoAnt4, velocidad4, promedio4
+	global contaD, tiempoAnt4, velocidad4, promedio4, canalD
+	canalD = GPIO.input(channel)
 	contaD += 1
 	deltaT = time.time() - tiempoAnt4
 	velocidad4 = [2*np.pi/(2*442*deltaT)] + velocidad4[0:-1]
@@ -67,8 +72,12 @@ def resetI():
 	velocidad4 = np.zeros(30).tolist()
 
 if __name__ == '__main__':
-	global contaA, contaB, promedio1, promedio2, contaC, contaD, promedio3, promedio4
+	global contaA, contaB, promedio1, promedio2, contaC, contaD, promedio3, promedio4, canalB, direcD, canalC, direcI
 	rospy.init_node('encoder')
+	canalB = False
+	canalC = False
+	direcD = False
+	direcI = False
 	promedio1 = 0 
 	promedio2 = 0
 	promedio3 = 0 
@@ -110,5 +119,13 @@ if __name__ == '__main__':
 		pub2.publish((contaA + contaB)/2)
 		pub3.publish((promedio3 + promedio4)/2)
 		pub4.publish((contaC + contaD)/2)
+		if (direcI):
+			pub6.publish(0)
+		else:
+			pub6.publish(1)
+		if (direcD):
+			pub5.publish(0)
+		else:
+			pub5.publish(1)
 		tasa.sleep()
 	GPIO.cleanup()
