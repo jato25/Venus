@@ -1,0 +1,8 @@
+#request fields
+
+---
+#response fields
+geometry_msgs/Pose start
+geometry_msgs/Pose goal
+int32 n_obstacles
+Obstacle[] obstacles
