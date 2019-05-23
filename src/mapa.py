@@ -147,8 +147,8 @@ if __name__ == '__main__':
 	n_obstacles = req.n_obstacles
 	for i in range(req.n_obstacles):
 		obstacles.append(np.array([req.obstacles[i].position.position.x , req.obstacles[i].position.position.y, req.obstacles[i].radius]))
-	#s = rospy.Service('pos_inicio', posInicio,  posInfo)
-	#s.spin()	
+	s = rospy.Service('pos_inicio', posInicio,  posInfo)
+	s.spin()	
 	start = np.array(start)
 	rospy.Subscriber('venus_position',Float32MultiArray, posActual)
 	crearCuadricula(obstacles)
