@@ -16,7 +16,7 @@ inv_J2 = np.array([[1.0/r,0],[0,1.0/r]])
 def arrancar():
 	#Suscripcion a topicos de ros
 	rospy.init_node('ControlPos', anonymous = True)
-	tasa = rospy.Rate(200)
+	tasa = rospy.Rate(50)
 	rospy.Subscriber('PosRobotSiguiente', Float32MultiArray, LeerPosSiguiente)
 	rospy.Subscriber('venus_position', Float32MultiArray, LeerPos)
 	#Se crean la cuadricula con las celdas para representar el mapa de V-rep
@@ -51,10 +51,9 @@ def R(theta): ##funcion que retorna la matriz de rotacion
 def control():
 	global posix, posiy, lastheta, vec, bandera, x_vec, y_vec
 	#Tomar las posiciones del topico de 
-	#x_vec,y_vec = Astar()
-	dx = x_vec - posix
-	dy = y_vec - posiy
-	dtheta = lastheta - thetafin
+	dx = posix - x_vec
+	dy = posiy - y_vec
+	dtheta = thetafin - lastheta
 	rho = 98
 	#rho = math.sqrt((dx)**2 + (dy)**2)
 	alpha = -lastheta + math.atan2(dy,dx)	#Se calculan los errores en coordenadas esfericas y se calcula la velocidad de acuerdo con kp
@@ -84,8 +83,6 @@ if __name__ == '__main__':
 	posix = 0
 	posiy = 0
 	vec = [0,0]
-	#matriz = [[0  for i in range(200)]for j in range(200)]
-	#matNod = [[Nodo([i , j]) for i in range(200)]for j in range(200)]
 	x_vec = 0
 	y_vec = 0
 	lastheta = 0

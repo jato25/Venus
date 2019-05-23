@@ -7,7 +7,7 @@ from master_msgs_iele3338.msg import Obstacle
 from geometry_msgs.msg import Pose, Point, Quaternion
 from std_msgs.msg import *
 
-tamanoCua = 125
+tamanoCua = 40
 robot = 130/tamanoCua
 pub = rospy.Publisher('PosRobotSiguiente', Float32MultiArray, queue_size=10)
 
@@ -39,7 +39,7 @@ def crearCuadricula(obstacles):
 class Nodo:
 	def __init__(self, pos):
 		self.pos = pos
-		self.coord = [tamanoCua/2 + (tamanoCua*pos[0]) , tamanoCua/2 + (tamanoCua*pos[1])]
+		self.coord = [tamanoCua/2 + (tamanoCua*pos[0]) , (2500 + (tamanoCua/2)) - (tamanoCua*pos[1])]
 		self.costo = 1000000000
 		self.vecinos = []
 		self.objetivo = False
@@ -70,8 +70,8 @@ class Nodo:
 def buscarNodo(x,y):
 	global matNod
 	a = int(round((x-tamanoCua/2)/tamanoCua))
-	b = int(round((y-tamanoCua/2)/tamanoCua))
-	return matNod[a][b]
+	b = int(round(((2500+(tamanoCua/2))-y)/tamanoCua))
+	return matNod[b][a]
 
 #Metodo que busca un mejor nodo que el que llama al metodo partiendo del costo actual devuelve el mejor nodo				
 def buscarMejor(nodos):
@@ -90,10 +90,10 @@ def Astar(inicio, destino):
 		for nod in fil:
 			nod.esActual(False)
 	pos_f = [destino[0],destino[1]]
-	goal = buscarNodo(destino[1],destino[0])
+	goal = buscarNodo(destino[0],destino[1])
 	goal.esObjetivo(True)
 	explorados = []
-	actual = buscarNodo(inicio[1],inicio[0])
+	actual = buscarNodo(inicio[0],inicio[1])
 	actual.asignarPadre(None)
 	explorados.append(actual)
 	actual.cambiarCosto(0)
@@ -117,7 +117,6 @@ def Astar(inicio, destino):
 				explorados.append(vecino)
 	rutax = []
 	rutay = []
-	print(actual.coord)
 	while actual.padre != None:
 		coord2 = actual.coord
 		rutax.append(coord2[0])
@@ -133,6 +132,7 @@ def posInfo(info):
 def posActual(data):
 	global venusPos
 	venusPos = data.data
+
 if __name__ == '__main__':
 	global matNod, matriz, start, venusPos
 	venusPos = [0,0,0]
@@ -148,31 +148,33 @@ if __name__ == '__main__':
 	for i in range(req.n_obstacles):
 		obstacles.append(np.array([req.obstacles[i].position.position.x , req.obstacles[i].position.position.y, req.obstacles[i].radius]))
 	s = rospy.Service('pos_inicio', posInicio,  posInfo)
-	s.spin()
+	s.spin()	
 	start = np.array(start)
 	rospy.Subscriber('venus_position',Float32MultiArray, posActual)
 	crearCuadricula(obstacles)
-	tasa = rospy.Rate(200)
+	tasa = rospy.Rate(50)
 	x_list,y_list = Astar(start, goal)
 	x_list.reverse()
 	y_list.reverse()
 	rospy.loginfo('Ruta Lista')
+	'''for i in range(len(x_list)):
+		print((x_list[i],y_list[i]))'''
+		#matriz[x_list[i]][y_list[i]] = '*'
+		#if i == 0:
+			#matriz[x_list[i]][y_list[i]] = 'I'
+	#matriz[ int(round((goal[0]-tamanoCua/2)/tamanoCua))][int(round(( (2500+(tamanoCua/2)) - goal[1])/tamanoCua))] = 'G'
+	'''for i in range(int(2500/tamanoCua)):
+		for j in range(int(2500/tamanoCua)):
+			print matriz[i][j],
+		print("")'''
 	while not rospy.is_shutdown():
 		for i in range(len(x_list)):
 			rho = 50000000
 			while (rho > 20):
 				rho = math.sqrt((x_list[i]-venusPos[0])**2 + (y_list[i]-venusPos[1])**2)
 				pub.publish(data = [x_list[i],y_list[i],0])
+				tasa.sleep()
 			rho = 50000000
 		tasa.sleep()
-	'''for i in range(len(x_list)):
-		matriz[x_list[i]][y_list[i]] = '*'
-		if i == len(x_list)-1:
-			matriz[x_list[i]][y_list[i]] = 'I'
-	matriz[int(goal[0]/tamanoCua)][int(goal[1]/tamanoCua)] = 'G'
-	for i in range(int(2500/tamanoCua)):
-		for j in range(int(2500/tamanoCua)):
-			print matriz[i][j],
-		print("")'''
 
 	

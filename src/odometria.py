@@ -14,22 +14,14 @@ b = 90.0
 r = 32.5	
 
 def callback(data):
-	global derAct
-	derAct = data.data
-	posicion()
+	global derAct, izqAct
+	derAct = data.data[0]
+	izqAct = data.data[1]
 
 def callback2(data):
-	global izqAct
-	izqAct = data.data
-	posicion()
-
-def callback3(data):
-	global dirDer
-	dirDer = data.data
-
-def callback4(data):
-	global dirIzq
-	dirIzq = data.data
+	global dirDer, dirIzq
+	dirDer = data.data[0]
+	dirIzq = data.data[1]
 
 def posicion():
 	global izqAct, derAct, izqAnt, derAnt, dirDer, dirIzq, pos, cov
@@ -71,12 +63,11 @@ if __name__ == '__main__':
 	met = rospy.ServiceProxy('pos_inicio', posInicio)
 	req = met()
 	pos = np.array(req.start)
-	rospy.Subscriber('cuentasDer', Int32, callback)
-	rospy.Subscriber('cuentasIzq', Int32, callback2)
-	rospy.Subscriber('dirDer', Int32, callback3)
-	rospy.Subscriber('dirIzq', Int32, callback4)
-	tasa = rospy.Rate(200)
+	rospy.Subscriber('motorsVel', Float32MultiArray, callback)
+	rospy.Subscriber('direcciones', Int32MultiArray, callback2)
+	tasa = rospy.Rate(50)
 	while not rospy.is_shutdown():
+		posicion()
 		data = Covariance()
 		data.sigma11 = cov[0][0]
 		data.sigma12 = cov[0][1]

@@ -38,6 +38,6 @@ if __name__ == '__main__':
 	s.spin()
 	s = rospy.Service('mapa_inicio', mapaInicio, inicioMapa)
 	s.spin()
-	tasa = rospy.Rate(10)
+	tasa = rospy.Rate(50)
 	while not rospy.is_shutdown():
 		tasa.sleep()

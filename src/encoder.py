@@ -10,10 +10,7 @@ GPIO.setup(2,GPIO.IN)
 GPIO.setup(3,GPIO.IN)
 GPIO.setup(4,GPIO.IN)
 GPIO.setup(17,GPIO.IN)
-pub1 = rospy.Publisher('encoderDer', Float32, queue_size=10)
-pub2 = rospy.Publisher('cuentasDer', Int32, queue_size=10)
-pub3 = rospy.Publisher('encoderIzq', Float32, queue_size=10)
-pub4 = rospy.Publisher('cuentasIzq', Int32, queue_size=10)
+pub = rospy.Publisher('motorsVel', Float32MultiArray, queue_size=10)
 
 #Callbacks
 def CuentaA(channel):
@@ -93,26 +90,20 @@ if __name__ == '__main__':
 	GPIO.add_event_detect(3, GPIO.BOTH, callback = CuentaB)
 	GPIO.add_event_detect(4, GPIO.BOTH, callback = CuentaC)
 	GPIO.add_event_detect(17, GPIO.BOTH, callback = CuentaD)
-	tasa = rospy.Rate(500)
+	tasa = rospy.Rate(50)
 	contaApre = 0
 	contaBpre = 0
 	contaCpre = 0
 	contaDpre = 0
-	tiempoCuentas = time.time()
 	while not rospy.is_shutdown():
-		if time.time() - tiempoCuentas > 0.04:
-			if contaA == contaApre and contaB == contaBpre:
-				resetD()
-			if contaC == contaCpre and contaD == contaDpre:
-				resetI()
-			tiempoCuentas = time.time()
-			contaApre = contaA
-			contaBpre = contaB
-			contaCpre = contaC
-			contaDpre = contaD
-		pub1.publish((promedio1 + promedio2)/2)
-		pub2.publish((contaA + contaB)/2)
-		pub3.publish((promedio3 + promedio4)/2)
-		pub4.publish((contaC + contaD)/2)
+		if contaA == contaApre and contaB == contaBpre:
+			resetD()
+		if contaC == contaCpre and contaD == contaDpre:
+			resetI()
+		contaApre = contaA
+		contaBpre = contaB
+		contaCpre = contaC
+		contaDpre = contaD
+		pub.publish(data = [(promedio1 + promedio2)/2 , (promedio3 + promedio4)/2])
 		tasa.sleep()
 	GPIO.cleanup()
