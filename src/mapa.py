@@ -33,7 +33,7 @@ def crearCuadricula(obstacles):
 				for indice in range(posN[0] - 1, posN[0] + 2 ,1):
 					for ja in range(posN[1] - 1, posN[1] + 2 ,1):
 						if (indice >= 0 and indice <= int(2500/tamanoCua)-1 and ja >= 0 and ja <= int(2500/tamanoCua)-1):
-							if (matriz[ja][indice] == 0 and not ((abs(indice - posN[0]) + abs(ja - posN[1])) == 0)):
+							if (matriz[indice][ja] == 0 and not ((abs(indice - posN[0]) + abs(ja - posN[1])) == 0)):
 								nod2.agregarVecinos(matNod[ja][indice])
 
 class Nodo:
@@ -147,18 +147,21 @@ if __name__ == '__main__':
 	n_obstacles = req.n_obstacles
 	for i in range(req.n_obstacles):
 		obstacles.append(np.array([req.obstacles[i].position.position.x , req.obstacles[i].position.position.y, req.obstacles[i].radius]))
-	s = rospy.Service('pos_inicio', posInicio,  posInfo)
-	s.spin()	
+	#s = rospy.Service('pos_inicio', posInicio,  posInfo)
+	#s.spin()	
 	start = np.array(start)
 	rospy.Subscriber('venus_position',Float32MultiArray, posActual)
 	crearCuadricula(obstacles)
+	rospy.loginfo('Mapa listo')
 	tasa = rospy.Rate(50)
 	x_list,y_list = Astar(start, goal)
 	x_list.reverse()
 	y_list.reverse()
-	rospy.loginfo('Ruta Lista')
-	'''for i in range(len(x_list)):
-		print((x_list[i],y_list[i]))'''
+	x_list.append(goal[0])
+	y_list.append(goal[1])
+	rospy.loginfo('Ruta lista')
+	#for i in range(len(x_list)):
+		#print((x_list[i],y_list[i]))
 		#matriz[x_list[i]][y_list[i]] = '*'
 		#if i == 0:
 			#matriz[x_list[i]][y_list[i]] = 'I'
