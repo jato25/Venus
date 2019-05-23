@@ -58,13 +58,13 @@ def control():
 	#rho = math.sqrt((dx)**2 + (dy)**2)
 	alpha = -lastheta + math.atan2(dy,dx)	#Se calculan los errores en coordenadas esfericas y se calcula la velocidad de acuerdo con kp
 	beta = -math.atan2(dy,dx) - dtheta
-	if (alpha >= 2*math.pi):
+	if (alpha >= math.pi):
 		alpha = alpha - 2*math.pi
-	elif (alpha <= -2*math.pi):
+	elif (alpha <= -math.pi):
 		alpha = alpha + 2*math.pi
-	if (beta >= 2*math.pi):
+	if (beta >= math.pi):
 		beta = beta - 2*math.pi
-	elif (beta <= -2*math.pi):
+	elif (beta <= -math.pi):
 		beta = beta + 2*math.pi
 	#Se definen las constantes de control proporcional por sintonizacion
 	kb = 0.07

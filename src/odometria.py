@@ -41,12 +41,16 @@ def posicion():
 	sen = math.sin((pos[2] + (dthe/2)))
 	dp = np.array([ds*cosen , ds*sen,  dthe])
 	pos = pos + dp
-	fp = np.array([[1,0,-dp[1]],[0,1,dp[0]],[0,0,1]])
+	if pos[3] >= math.pi:
+		pos[3] = pos[3] - 2*math.pi
+	elif pos[3] <= -math.pi:
+		pos[3] = pos[3] + 2*math.pi
+ 	fp = np.array([[1,0,-dp[1]],[0,1,dp[0]],[0,0,1]])
 	sigs = np.array([[abs(dder),0],[0,abs(dizq)]])
 	fs = np.array([[((cosen/2)-(ds*sen/(2*b))) , ((cosen/2)+(ds*sen/(2*b)))],[((sen/2)+(ds*cosen/(2*b))) , ((sen/2)-(ds*cosen/(2*b)))],[1/b , -1/b]])
 	p1 = np.matmul( fp, cov )
 	p2 = np.matmul( fs, sigs )
-	cov = np.matmul( p1, fp.T ) + np.matmul( p2 , fs.T)
+	cov = np.matmul( p1, fp.T ) + np.matmul( p2 , fs.T )
 
 if __name__ == '__main__':
 	global izqAnt, derAnt, derAct, izqAct, dirDer, dirIzq, pos, cov
