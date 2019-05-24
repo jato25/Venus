@@ -112,13 +112,13 @@ def Astar(inicio, destino):
 			costo = costos[actual] + actual.defHeu(vecino.coord)
 			if (vecino not in explorados and not vecino.visitado) or costo < costos[vecino]:
 				costos[vecino] = costo
-				vecino.cambiarCosto(6*costo + 3*vecino.defHeu(pos_f))
+				vecino.cambiarCosto(3*costo + vecino.defHeu(pos_f))
 				vecino.asignarPadre(actual)
 				explorados.append(vecino)
 	rutax = []
 	rutay = []
 	while actual.padre != None:
-		coord2 = actual.coord
+		coord2 = actual.pos
 		rutax.append(coord2[0])
 		rutay.append(coord2[1])
 		actual = actual.padre
@@ -147,8 +147,8 @@ if __name__ == '__main__':
 	n_obstacles = req.n_obstacles
 	for i in range(req.n_obstacles):
 		obstacles.append(np.array([req.obstacles[i].position.position.x , req.obstacles[i].position.position.y, req.obstacles[i].radius]))
-	s = rospy.Service('pos_inicio', posInicio,  posInfo)
-	s.spin()	
+	#s = rospy.Service('pos_inicio', posInicio,  posInfo)
+	#s.spin()	
 	start = np.array(start)
 	rospy.Subscriber('venus_position',Float32MultiArray, posActual)
 	crearCuadricula(obstacles)
@@ -157,19 +157,18 @@ if __name__ == '__main__':
 	x_list,y_list = Astar(start, goal)
 	x_list.reverse()
 	y_list.reverse()
-	x_list.append(goal[0])
-	y_list.append(goal[1])
+	#x_list.append(goal[0])
+	#y_list.append(goal[1])
 	rospy.loginfo('Ruta lista')
-	#for i in range(len(x_list)):
+	for i in range(len(x_list)):
 		#print((x_list[i],y_list[i]))
-		#matriz[x_list[i]][y_list[i]] = '*'
-		#if i == 0:
-			#matriz[x_list[i]][y_list[i]] = 'I'
-	#matriz[ int(round((goal[0]-tamanoCua/2)/tamanoCua))][int(round(( (2500+(tamanoCua/2)) - goal[1])/tamanoCua))] = 'G'
-	'''for i in range(int(2500/tamanoCua)):
+		matriz[x_list[i]][y_list[i]] = '*'
+		if i == 0:
+			matriz[x_list[i]][y_list[i]] = 'I'
+	for i in range(int(2500/tamanoCua)):
 		for j in range(int(2500/tamanoCua)):
 			print matriz[i][j],
-		print("")'''
+		print("")
 	while not rospy.is_shutdown():
 		for i in range(len(x_list)):
 			rho = 50000000
