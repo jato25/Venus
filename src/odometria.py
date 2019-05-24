@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import rospy
+import rospy, time
 import numpy as np
 from pylab import math
 from std_msgs.msg import *
@@ -11,12 +11,16 @@ pub = rospy.Publisher('robot_uncertainty', Covariance, queue_size=10)
 pub1 = rospy.Publisher('robot_position', Pose, queue_size=10)
 pub2 = rospy.Publisher('venus_position', Float32MultiArray, queue_size=10)
 b = 90.0
-r = 32.5	
+r = 32.5
 
 def callback(data):
-	global derAct, izqAct
+	global tiempo, dder,dizq
 	derAct = data.data[0]
 	izqAct = data.data[1]
+	dtiempo = time.time()-tiempo
+	tiempo = time.time()
+	dder = derAct*dtiempo*r
+	dizq = izqAct*dtiempo*r
 
 def callback2(data):
 	global dirDer, dirIzq
@@ -24,13 +28,7 @@ def callback2(data):
 	dirIzq = data.data[1]
 
 def posicion():
-	global izqAct, derAct, izqAnt, derAnt, dirDer, dirIzq, pos, cov
-	dizq = izqAct - izqAnt
-	dder = derAct - derAnt
-	izqAnt = izqAct
-	derAnt = derAct
-	dizq = 2*np.pi*dizq*r/(2*442)
-	dder = 2*np.pi*dder*r/(2*442)
+	global dirDer, dirIzq, pos, cov, dder,dizq
 	if (dirDer == 0):
 		dder = -dder
 	if (dirIzq == 0):
@@ -41,10 +39,10 @@ def posicion():
 	sen = math.sin((pos[2] + (dthe/2)))
 	dp = np.array([ds*cosen , ds*sen,  dthe])
 	pos = pos + dp
-	if pos[3] >= math.pi:
-		pos[3] = pos[3] - 2*math.pi
-	elif pos[3] <= -math.pi:
-		pos[3] = pos[3] + 2*math.pi
+	if pos[2] > 2*math.pi:
+		pos[2] = pos[2] - 2*math.pi
+	elif pos[2] < 0:
+		pos[2] = pos[2] + 2*math.pi
  	fp = np.array([[1,0,-dp[1]],[0,1,dp[0]],[0,0,1]])
 	sigs = np.array([[abs(dder),0],[0,abs(dizq)]])
 	fs = np.array([[((cosen/2)-(ds*sen/(2*b))) , ((cosen/2)+(ds*sen/(2*b)))],[((sen/2)+(ds*cosen/(2*b))) , ((sen/2)-(ds*cosen/(2*b)))],[1/b , -1/b]])
@@ -53,13 +51,12 @@ def posicion():
 	cov = np.matmul( p1, fp.T ) + np.matmul( p2 , fs.T )
 
 if __name__ == '__main__':
-	global izqAnt, derAnt, derAct, izqAct, dirDer, dirIzq, pos, cov
-	izqAct = 0
-	derAct = 0
+	global  dirDer, dirIzq, pos, cov, tiempo, dder,dizq
+	dder=0
+	dizq=0
 	dirDer = 0
 	dirIzq = 0
-	izqAnt = 0
-	derAnt = 0
+	tiempo = time.time()
 	start = [0,0,0]
 	cov = np.zeros((3,3))
 	rospy.init_node('odometria')

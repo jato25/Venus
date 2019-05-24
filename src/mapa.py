@@ -7,7 +7,7 @@ from master_msgs_iele3338.msg import Obstacle
 from geometry_msgs.msg import Pose, Point, Quaternion
 from std_msgs.msg import *
 
-tamanoCua = 40
+tamanoCua = 60
 robot = 130/tamanoCua
 pub = rospy.Publisher('PosRobotSiguiente', Float32MultiArray, queue_size=10)
 
@@ -112,7 +112,7 @@ def Astar(inicio, destino):
 			costo = costos[actual] + actual.defHeu(vecino.coord)
 			if (vecino not in explorados and not vecino.visitado) or costo < costos[vecino]:
 				costos[vecino] = costo
-				vecino.cambiarCosto(3*costo + vecino.defHeu(pos_f))
+				vecino.cambiarCosto(costo + 3*vecino.defHeu(pos_f))
 				vecino.asignarPadre(actual)
 				explorados.append(vecino)
 	rutax = []
@@ -172,11 +172,13 @@ if __name__ == '__main__':
 	while not rospy.is_shutdown():
 		for i in range(len(x_list)):
 			rho = 50000000
-			while (rho > 20):
+			while (rho > 30):
 				rho = math.sqrt((x_list[i]-venusPos[0])**2 + (y_list[i]-venusPos[1])**2)
-				pub.publish(data = [x_list[i],y_list[i],0])
+				pub.publish(data = [x_list[i],y_list[i],math.pi])
 				tasa.sleep()
 			rho = 50000000
+		x_list = []
+		y_list = []
 		tasa.sleep()
 
 	

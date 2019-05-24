@@ -54,7 +54,7 @@ def control():
 	dx = posix - x_vec
 	dy = posiy - y_vec
 	dtheta = thetafin - lastheta
-	rho = 98
+	rho = 120
 	#rho = math.sqrt((dx)**2 + (dy)**2)
 	alpha = -lastheta + math.atan2(dy,dx)	#Se calculan los errores en coordenadas esfericas y se calcula la velocidad de acuerdo con kp
 	beta = -math.atan2(dy,dx) - dtheta
@@ -69,7 +69,7 @@ def control():
 	#Se definen las constantes de control proporcional por sintonizacion
 	kb = 0.07
 	kp = 1
-	ka = 1.8
+	ka = 1.9
 	v = kp * rho
 	x = v*math.cos(lastheta)
 	y = v*math.sin(lastheta)

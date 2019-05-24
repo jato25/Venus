@@ -16,34 +16,38 @@ pub = rospy.Publisher('motorsVel', Float32MultiArray, queue_size=10)
 def CuentaA(channel):
 	global contaA, tiempoAnt1, velocidad1, promedio1
 	contaA += 1
-	deltaT = time.time() - tiempoAnt1
-	velocidad1 = [2*np.pi/(2*442*deltaT)] + velocidad1[0:-1]
-	promedio1 = np.mean(velocidad1)
-	tiempoAnt1 = time.time()
+	if (contaA % 40 == 0):	
+		deltaT = time.time() - tiempoAnt1
+		velocidad1 = [2*40*np.pi/(442*deltaT)] + velocidad1[0:-1]
+		promedio1 = np.mean(velocidad1)
+		tiempoAnt1 = time.time()
 
 def CuentaB(channel):
 	global contaB, tiempoAnt2, velocidad2, promedio2
 	contaB += 1
-	deltaT = time.time() - tiempoAnt2
-	velocidad2 = [2*np.pi/(2*442*deltaT)] + velocidad2[0:-1]
-	promedio2 = np.mean(velocidad2)
-	tiempoAnt2 = time.time()
+	if (contaB % 40 == 0):
+		deltaT = time.time() - tiempoAnt2
+		velocidad2 = [2*40*np.pi/(442*deltaT)] + velocidad2[0:-1]
+		promedio2 = np.mean(velocidad2)
+		tiempoAnt2 = time.time()
 
 def CuentaC(channel):
 	global contaC, tiempoAnt3, velocidad3, promedio3
 	contaC += 1
-	deltaT = time.time() - tiempoAnt3
-	velocidad3 = [2*np.pi/(2*442*deltaT)] + velocidad3[0:-1]
-	promedio3 = np.mean(velocidad3)
-	tiempoAnt3 = time.time()
+	if (contaC % 40 == 0):
+		deltaT = time.time() - tiempoAnt3
+		velocidad3 = [2*40*np.pi/(442*deltaT)] + velocidad3[0:-1]
+		promedio3 = np.mean(velocidad3)
+		tiempoAnt3 = time.time()
 
 def CuentaD(channel):
 	global contaD, tiempoAnt4, velocidad4, promedio4
 	contaD += 1
-	deltaT = time.time() - tiempoAnt4
-	velocidad4 = [2*np.pi/(2*442*deltaT)] + velocidad4[0:-1]
-	promedio4 = np.mean(velocidad4)
-	tiempoAnt4 = time.time()
+	if (contaD % 40 == 0):
+		deltaT = time.time() - tiempoAnt4
+		velocidad4 = [2*40*np.pi/(442*deltaT)] + velocidad4[0:-1]
+		promedio4 = np.mean(velocidad4)
+		tiempoAnt4 = time.time()
 
 def resetD():
 	global tiempoAnt1, velocidad1, tiempoAnt2, velocidad2, promedio1, promedio2
@@ -86,11 +90,11 @@ if __name__ == '__main__':
 	velocidad2 = np.zeros(30).tolist()
 	velocidad3 = np.zeros(30).tolist()
 	velocidad4 = np.zeros(30).tolist()
-	GPIO.add_event_detect(2, GPIO.BOTH, callback = CuentaA)
-	GPIO.add_event_detect(3, GPIO.BOTH, callback = CuentaB)
-	GPIO.add_event_detect(4, GPIO.BOTH, callback = CuentaC)
-	GPIO.add_event_detect(17, GPIO.BOTH, callback = CuentaD)
-	tasa = rospy.Rate(50)
+	GPIO.add_event_detect(2, GPIO.RISING, callback = CuentaA)
+	GPIO.add_event_detect(3, GPIO.RISING, callback = CuentaB)
+	GPIO.add_event_detect(4, GPIO.RISING, callback = CuentaC)
+	GPIO.add_event_detect(17, GPIO.RISING, callback = CuentaD)
+	tasa = rospy.Rate(100)
 	contaApre = 0
 	contaBpre = 0
 	contaCpre = 0
